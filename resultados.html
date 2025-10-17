@@ -1,0 +1,15 @@
+<section id="registro">
+  <h2>Registrar Asistencia</h2>
+  <form action="/registrar_asistencia" method="POST">
+    <label for="nombre">Nombre del estudiante:</label><br>
+    <input type="text" name="nombre" required><br><br>
+
+    <label>Presente:</label>
+    <select name="presente">
+      <option value="1">Sí</option>
+      <option value="0">No</option>
+    </select><br><br>
+
+    <button type="submit">Guardar Asistencia</button>
+  </form>
+</section>
