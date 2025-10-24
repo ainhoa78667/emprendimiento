@@ -2,21 +2,273 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Registrar Asistencia</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Cobros y Asistencia</title>
+  <style>
+    /* ===== ESTILOS GENERALES ===== */
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f6f8;
+      color: #333;
+    }
+
+    header {
+      background-color: #2f3e46;
+      color: white;
+      text-align: center;
+      padding: 1.5rem 0;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.8rem;
+    }
+
+    header p {
+      margin: 0.2rem 0 0;
+      font-size: 0.95rem;
+      color: #cfd8dc;
+    }
+
+    /* ===== TABLA ESTILO PASTEL ===== */
+    .tabla-container {
+      max-width: 90%;
+      margin: 30px auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.95rem;
+    }
+
+    th, td {
+      border: 1px solid #dcdcdc;
+      padding: 10px;
+    }
+
+    th {
+      background-color: #a8dadc; /* pastel azul */
+      color: #1d3557;
+      font-weight: 600;
+    }
+
+    tr:nth-child(even) td {
+      background-color: #f1faee; /* pastel verde muy claro */
+    }
+
+    tr:nth-child(odd) td {
+      background-color: #ffe5d9; /* pastel naranja suave */
+    }
+
+    tr:hover td {
+      background-color: #caf0f8; /* hover pastel azul claro */
+    }
+
+    /* ===== FORMULARIO ===== */
+    .card {
+      max-width: 600px;
+      margin: 0 auto 50px;
+      background-color: #ffffff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .card h2 {
+      margin-bottom: 15px;
+      color: #1d3557;
+      border-bottom: 2px solid #a8dadc;
+      padding-bottom: 5px;
+    }
+
+    label {
+      display: block;
+      margin-top: 12px;
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      background-color: #f9fafb;
+      font-size: 0.95rem;
+    }
+
+    .registrar-btn {
+      margin-top: 20px;
+      width: 100%;
+      background-color: #a8dadc;
+      color: #1d3557;
+      border: none;
+      padding: 12px;
+      border-radius: 6px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .registrar-btn:hover {
+      background-color: #457b9d;
+      color: white;
+    }
+
+    /* Botón PDF */
+    #pdf-btn {
+      display: block;
+      margin: 20px auto;
+      padding: 12px 25px;
+      background-color: #ffb3b3;
+      color: #800000;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.2s ease;
+    }
+
+    #pdf-btn:hover {
+      background-color: #ff6b6b;
+      color: white;
+    }
+  </style>
 </head>
+
 <body>
-  <h1>Registro de Asistencia</h1>
-  <form action="/registrar_asistencia" method="POST">
-    <label>Nombre del estudiante:</label><br>
-    <input type="text" name="nombre" required><br><br>
 
-    <label>Presente:</label><br>
-    <select name="presente">
-      <option value="1">Sí</option>
-      <option value="0">No</option>
-    </select><br><br>
+  <header>
+    <h1>Sistema de Cobros y Asistencia</h1>
+    <p>Colegio San Rafael “B” - Cochabamba, Bolivia</p>
+  </header>
 
-    <button type="submit">Registrar</button>
-  </form>
+  <!-- TABLA DE REGISTRO -->
+  <div class="tabla-container">
+    <table id="tabla-asistencia">
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Fecha</th>
+          <th>Asistencia</th>
+          <th>Cobro</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Juan Pérez</td>
+          <td>24/10/2025</td>
+          <td>Presente</td>
+          <td>Pagado</td>
+        </tr>
+        <tr>
+          <td>Ana López</td>
+          <td>24/10/2025</td>
+          <td>Ausente</td>
+          <td>Pendiente</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <button id="pdf-btn">Generar PDF</button>
+
+  <!-- FORMULARIO DE ASISTENCIA -->
+  <section class="card">
+    <h2>Registro de Asistencia</h2>
+    <form id="asistencia-form">
+      <label>Nombre del estudiante:</label>
+      <input type="text" name="nombre" placeholder="Ingrese el nombre" required>
+
+      <label>Fecha:</label>
+      <input type="text" name="fecha" id="fecha" readonly>
+
+      <label>Presente:</label>
+      <select name="presente">
+        <option value="Presente">Sí</option>
+        <option value="Ausente">No</option>
+      </select>
+
+      <label>Cobro:</label>
+      <select name="cobro">
+        <option value="Pagado">Pagado</option>
+        <option value="Pendiente">Pendiente</option>
+      </select>
+
+      <button type="submit" class="registrar-btn">Registrar Asistencia</button>
+    </form>
+  </section>
+
+  <!-- ===== SCRIPTS ===== -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+
+  <script>
+    const tabla = document.querySelector('#tabla-asistencia tbody');
+    const form = document.getElementById('asistencia-form');
+    const fechaInput = document.getElementById('fecha');
+
+    // Función para actualizar fecha
+    const actualizarFecha = () => {
+      const hoy = new Date();
+      const dia = String(hoy.getDate()).padStart(2, '0');
+      const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+      const anio = hoy.getFullYear();
+      fechaInput.value = `${dia}/${mes}/${anio}`;
+    };
+    actualizarFecha();
+
+    // Registrar asistencia dinámicamente
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const nombre = form.nombre.value;
+      const fecha = form.fecha.value;
+      const presente = form.presente.value;
+      const cobro = form.cobro.value;
+
+      const nuevaFila = document.createElement('tr');
+      nuevaFila.innerHTML = `
+        <td>${nombre}</td>
+        <td>${fecha}</td>
+        <td>${presente}</td>
+        <td>${cobro}</td>
+      `;
+      tabla.appendChild(nuevaFila);
+      form.reset();
+      actualizarFecha(); // actualizar fecha para el siguiente registro
+    });
+
+    // Generar PDF
+    document.getElementById('pdf-btn').addEventListener('click', () => {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      doc.setFontSize(14);
+      doc.text("Lista de Asistencia", 14, 20);
+
+      const headers = [["Nombre", "Fecha", "Asistencia", "Cobro"]];
+      const data = Array.from(tabla.querySelectorAll('tr')).map(tr =>
+        Array.from(tr.children).map(td => td.textContent)
+      );
+
+      doc.autoTable({
+        head: headers,
+        body: data,
+        startY: 30,
+        theme: 'grid'
+      });
+
+      doc.save("lista_asistencia.pdf");
+    });
+  </script>
+
 </body>
 </html>

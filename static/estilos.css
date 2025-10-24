@@ -1,0 +1,142 @@
+/* ==== PALETA DE COLORES NEUTROS ==== */
+:root {
+    --blanco: #FFFFFF;
+    --gris-fondo: #F5F6F8;
+    --gris-borde: #D1D5DB;
+    --gris-claro: #E5E7EB;
+    --gris-texto: #374151;
+    --gris-oscuro: #1F2937;
+    --azul-acento: #3B82F6;
+    --azul-hover: #2563EB;
+    --verde: #16A34A;
+    --verde-hover: #15803D;
+    --sombra: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+/* ==== RESETEO GENERAL ==== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Segoe UI", "Helvetica", sans-serif;
+}
+
+/* ==== BODY ==== */
+body {
+    background-color: var(--gris-fondo);
+    color: var(--gris-texto);
+    line-height: 1.6;
+}
+
+/* ==== HEADER ==== */
+header {
+    background-color: var(--gris-oscuro);
+    color: var(--blanco);
+    text-align: center;
+    padding: 25px;
+    border-bottom: 3px solid var(--azul-acento);
+    box-shadow: var(--sombra);
+}
+
+header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+header p {
+    font-size: 1rem;
+    opacity: 0.9;
+}
+
+/* ==== CONTENEDOR PRINCIPAL ==== */
+.main-container {
+    max-width: 1000px;
+    margin: 30px auto;
+    background-color: var(--blanco);
+    border-radius: 10px;
+    padding: 30px;
+    box-shadow: var(--sombra);
+}
+
+/* ==== TABLA TIPO EXCEL ==== */
+table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-bottom: 30px;
+    font-size: 0.95em;
+    border: 1px solid var(--gris-borde);
+}
+
+th {
+    background-color: var(--azul-acento); /* color de cabecera */
+    color: var(--blanco);
+    text-align: left;
+    padding: 12px;
+    border: 1px solid var(--gris-borde);
+    font-weight: 600;
+}
+
+td {
+    padding: 10px;
+    border: 1px solid var(--gris-borde);
+    background-color: var(--gris-claro); /* color de celdas */
+}
+
+tr:nth-child(even) td {
+    background-color: #E0E7FF; /* color alterno para filas */
+}
+
+tr:hover td {
+    background-color: #C7D2FE; /* hover sobre filas */
+}
+
+/* ==== FORMULARIO ==== */
+form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px 25px;
+}
+
+label {
+    font-weight: 600;
+    grid-column: span 2;
+}
+
+input[type="text"], select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--gris-borde);
+    border-radius: 6px;
+    background-color: var(--gris-claro);
+    outline: none;
+    transition: border 0.3s, box-shadow 0.3s;
+}
+
+input[type="text"]:focus, select:focus {
+    border-color: var(--azul-acento);
+    box-shadow: 0 0 6px rgba(59,130,246,0.3);
+}
+
+/* ==== BOTONES DEL FORMULARIO ==== */
+button {
+    padding: 12px;
+    border: none;
+    border-radius: 6px;
+    color: var(--blanco);
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+    grid-column: span 2;
+    background-color: var(--azul-acento);
+}
+
+button:hover {
+    background-color: var(--azul-hover);
+}
+
+/* ==== RESPONSIVE ==== */
+@media (max-width: 800px) {
+    form {
+        grid-template-columns: 1fr;
+    }
+}
