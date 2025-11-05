@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reportes</title>
+  <style>
+    body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f9f9f9; padding: 20px; }
+    h2 { color: #333; }
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
+    th { background-color: #e0e0e0; }
+    tr:nth-child(even) { background-color: #f2f2f2; }
+    a { display: inline-block; margin-top: 20px; padding: 10px 15px; background-color: #5c9ded; color: white; text-decoration: none; border-radius: 5px; }
+    a:hover { background-color: #4a8bd4; }
+  </style>
+</head>
+<body>
+  <h2>Estudiantes con Pagos Pendientes</h2>
+  {% if deudores %}
+  <table>
+    <tr>
+      <th>Estudiante</th>
+      <th>Monto</th>
+      <th>Estado</th>
+      <th>Fecha</th>
+    </tr>
+    {% for d in deudores %}
+    <tr>
+      <td>{{ d[0] }}</td>
+      <td>{{ d[1] }}</td>
+      <td>{{ d[2] }}</td>
+      <td>{{ d[3] }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <p>No hay estudiantes con pagos pendientes.</p>
+  {% endif %}
+
+  <h2>Estudiantes que No Asistieron</h2>
+  {% if ausentes %}
+  <table>
+    <tr>
+      <th>Estudiante</th>
+      <th>Fecha</th>
+    </tr>
+    {% for a in ausentes %}
+    <tr>
+      <td>{{ a[0] }}</td>
+      <td>{{ a[1] }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <p>No hay estudiantes ausentes.</p>
+  {% endif %}
+
+  <a href="{{ url_for('index') }}">⬅ Volver al Inicio</a>
+</body>
+</html>
