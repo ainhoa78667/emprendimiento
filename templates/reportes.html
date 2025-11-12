@@ -6,39 +6,89 @@
   <title>Reportes</title>
   <style>
     body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f9f9f9; padding: 20px; }
-    h2 { color: #333; }
-    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    h2 { color: #333; margin-top: 30px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
     th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
     th { background-color: #e0e0e0; }
     tr:nth-child(even) { background-color: #f2f2f2; }
     a { display: inline-block; margin-top: 20px; padding: 10px 15px; background-color: #5c9ded; color: white; text-decoration: none; border-radius: 5px; }
     a:hover { background-color: #4a8bd4; }
+    form { margin-bottom: 30px; padding: 15px; background-color: #f0f0f0; border-radius: 5px; }
+    label { display: block; margin-top: 10px; }
+    input, textarea, select { width: 100%; padding: 8px; margin-top: 5px; border-radius: 3px; border: 1px solid #ccc; }
+    input[type="submit"] { width: auto; background-color: #5c9ded; color: white; border: none; cursor: pointer; padding: 10px 15px; margin-top: 15px; }
+    input[type="submit"]:hover { background-color: #4a8bd4; }
   </style>
 </head>
 <body>
-  <h2>Estudiantes con Pagos Pendientes</h2>
+
+  <h2>Registrar Nuevo Reporte</h2>
+  <form action="{{ url_for('reportes') }}" method="POST">
+    <label for="estudiante_id">Seleccionar Estudiante:</label>
+    <select id="estudiante_id" name="estudiante_id" required>
+      <option value="">-- Seleccionar --</option>
+      {% for e in estudiantes %}
+        <option value="{{ e[0] }}">{{ e[1] }}</option>
+      {% endfor %}
+    </select>
+
+    <label for="fecha_reporte">Fecha del Reporte:</label>
+    <input type="date" id="fecha_reporte" name="fecha_reporte" required>
+
+    <label for="tipo_reporte">Tipo de Reporte:</label>
+    <input type="text" id="tipo_reporte" name="tipo_reporte" required>
+
+    <label for="descripcion">Descripción:</label>
+    <textarea id="descripcion" name="descripcion"></textarea>
+
+    <input type="submit" value="Registrar Reporte">
+  </form>
+
+  <h2>Reportes Registrados</h2>
+  {% if reportes %}
+  <table>
+    <tr>
+      <th>ID</th>
+      <th>Estudiante</th>
+      <th>Fecha</th>
+      <th>Tipo</th>
+      <th>Descripción</th>
+    </tr>
+    {% for r in reportes %}
+    <tr>
+      <td>{{ r[0] }}</td>
+      <td>{{ r[1] }}</td>
+      <td>{{ r[2] }}</td>
+      <td>{{ r[3] }}</td>
+      <td>{{ r[4] }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <p>No hay reportes registrados.</p>
+  {% endif %}
+
+  <h2>Cancelado</h2>
   {% if deudores %}
   <table>
     <tr>
       <th>Estudiante</th>
       <th>Monto</th>
-      <th>Estado</th>
-      <th>Fecha</th>
+      <th>Fecha de Pago</th>
     </tr>
     {% for d in deudores %}
     <tr>
       <td>{{ d[0] }}</td>
       <td>{{ d[1] }}</td>
-      <td>{{ d[2] }}</td>
       <td>{{ d[3] }}</td>
     </tr>
     {% endfor %}
   </table>
   {% else %}
-  <p>No hay estudiantes con pagos pendientes.</p>
+  <p>No hay deudores pendientes.</p>
   {% endif %}
 
-  <h2>Estudiantes que No Asistieron</h2>
+  <h2>Ausentes</h2>
   {% if ausentes %}
   <table>
     <tr>
@@ -53,9 +103,10 @@
     {% endfor %}
   </table>
   {% else %}
-  <p>No hay estudiantes ausentes.</p>
+  <p>No hay ausentes registrados.</p>
   {% endif %}
 
   <a href="{{ url_for('index') }}">⬅ Volver al Inicio</a>
+
 </body>
 </html>

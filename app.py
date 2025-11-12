@@ -3,9 +3,6 @@ from conexion import conectar
 
 app = Flask(__name__)
 
-# Conexión a la base de datos
-db = conectar()
-
 # ====== INDEX ======
 @app.route('/')
 def index():
@@ -14,71 +11,128 @@ def index():
 # ====== REGISTRAR ESTUDIANTES ======
 @app.route('/registrar_estudiantes', methods=['GET', 'POST'])
 def registrar_estudiantes():
-    cursor = db.cursor()
+    conexion = conectar()
+    cursor = conexion.cursor()
     if request.method == 'POST':
         nombre = request.form['nombre'].strip()
         curso = request.form['curso'].strip()
-        # Evitar duplicados
-        cursor.execute("SELECT COUNT(*) FROM estudiantes WHERE nombre = %s", (nombre,))
+        correo = request.form.get('correo', '').strip()
+        if correo == '':
+            correo = None
+        cursor.execute("SELECT COUNT(*) FROM estudiantes WHERE nombre = %s AND curso = %s", (nombre, curso))
         if cursor.fetchone()[0] == 0:
-            cursor.execute("INSERT INTO estudiantes (nombre, curso) VALUES (%s, %s)", (nombre, curso))
-            db.commit()
-    # Consultar todos los estudiantes
-    cursor.execute("SELECT DISTINCT nombre, curso FROM estudiantes ORDER BY nombre")
+            cursor.execute("INSERT INTO estudiantes (nombre, curso, correo) VALUES (%s, %s, %s)", (nombre, curso, correo))
+            conexion.commit()
+    cursor.execute("SELECT id, nombre, curso, correo FROM estudiantes ORDER BY nombre")
     estudiantes = cursor.fetchall()
     cursor.close()
+    conexion.close()
     return render_template('registrar_estudiantes.html', estudiantes=estudiantes)
 
 # ====== REGISTRAR ASISTENCIA ======
 @app.route('/registrar_asistencia', methods=['GET', 'POST'])
 def registrar_asistencia():
-    cursor = db.cursor()
+    conexion = conectar()
+    cursor = conexion.cursor()
     if request.method == 'POST':
-        nombre = request.form['estudiante_id'].strip()
+        estudiante_id = request.form['estudiante_id']
         presente = request.form['presente']
-        # Evitar duplicados por día
-        cursor.execute("SELECT COUNT(*) FROM asistencia WHERE estudiante_id = %s AND fecha = CURDATE()", (nombre,))
+        cursor.execute("SELECT COUNT(*) FROM asistencia WHERE estudiante_id = %s AND fecha = CURDATE()", (estudiante_id,))
         if cursor.fetchone()[0] == 0:
-            cursor.execute("INSERT INTO asistencia (estudiante_id, fecha, presente) VALUES (%s, CURDATE(), %s)", (nombre, presente))
-            db.commit()
-    # Mostrar lista de asistencia
-    cursor.execute("SELECT DISTINCT estudiante_id, fecha, presente FROM asistencia ORDER BY fecha DESC")
+            cursor.execute("INSERT INTO asistencia (estudiante_id, fecha, presente) VALUES (%s, CURDATE(), %s)", (estudiante_id, presente))
+            conexion.commit()
+    cursor.execute("""
+        SELECT e.nombre, a.fecha, a.presente
+        FROM asistencia a
+        JOIN estudiantes e ON a.estudiante_id = e.id
+        ORDER BY a.fecha DESC
+    """)
     asistencias = cursor.fetchall()
+    cursor.execute("SELECT id, nombre, curso FROM estudiantes ORDER BY nombre")
+    estudiantes = cursor.fetchall()
     cursor.close()
-    return render_template('registrar_asistencia.html', asistencias=asistencias)
+    conexion.close()
+    return render_template('registrar_asistencia.html', asistencias=asistencias, estudiantes=estudiantes)
 
 # ====== REGISTRAR COBROS ======
-@app.route('/registrar_cobro', methods=['GET', 'POST'])
-def registrar_cobro():
-    cursor = db.cursor()
+@app.route('/registrar_cobros', methods=['GET', 'POST'])
+def registrar_cobros():
+    conexion = conectar()
+    cursor = conexion.cursor()
     if request.method == 'POST':
-        nombre = request.form['nombre'].strip()
+        estudiante_id = request.form['estudiante_id']
+        concepto = request.form['concepto'].strip()
         monto = request.form['monto']
-        estado = request.form['estado']
-        # Evitar duplicados por día
-        cursor.execute("SELECT COUNT(*) FROM cobros WHERE nombre = %s AND fecha = CURDATE()", (nombre,))
-        if cursor.fetchone()[0] == 0:
-            cursor.execute("INSERT INTO cobros (estudiante_id, concepto, monto, fecha_pago) VALUES (%s, %s, %s, CURDATE())", (nombre, monto, estado))
-            db.commit()
-    cursor.execute("SELECT DISTINCT estudiante_id, concepto, monto, fecha_pago FROM cobros ORDER BY fecha_pago DESC")
+        # Quitamos la columna 'estado'
+        cursor.execute("""
+            INSERT INTO cobros (estudiante_id, concepto, monto, fecha_pago)
+            VALUES (%s, %s, %s, CURDATE())
+        """, (estudiante_id, concepto, monto))
+        conexion.commit()
+    cursor.execute("""
+        SELECT e.nombre, c.concepto, c.monto, c.fecha_pago
+        FROM cobros c
+        JOIN estudiantes e ON c.estudiante_id = e.id
+        ORDER BY c.fecha_pago DESC
+    """)
     cobros = cursor.fetchall()
+    cursor.execute("SELECT id, nombre, curso FROM estudiantes ORDER BY nombre")
+    estudiantes = cursor.fetchall()
     cursor.close()
-    return render_template('registrar_cobro.html', cobros=cobros)
+    conexion.close()
+    return render_template('registrar_cobros.html', cobros=cobros, estudiantes=estudiantes)
 
 # ====== REPORTES ======
-@app.route('/reportes')
+@app.route('/reportes', methods=['GET', 'POST'])
 def reportes():
-    cursor = db.cursor()
-    # Alumnos que no pagaron
-    cursor.execute("SELECT nombre, monto, estado, fecha FROM cobros WHERE estado='Pendiente' ORDER BY fecha DESC")
+    conexion = conectar()
+    cursor = conexion.cursor()
+    if request.method == 'POST':
+        estudiante_id = request.form['estudiante_id']
+        fecha_reporte = request.form['fecha_reporte']
+        tipo_reporte = request.form['tipo_reporte'].strip()
+        descripcion = request.form['descripcion'].strip()
+        cursor.execute("""
+            INSERT INTO reportes (estudiante_id, fecha_reporte, tipo_reporte, descripcion)
+            VALUES (%s, %s, %s, %s)
+        """, (estudiante_id, fecha_reporte, tipo_reporte, descripcion))
+        conexion.commit()
+
+    # Reportes
+    cursor.execute("""
+        SELECT r.id, e.nombre, r.fecha_reporte, r.tipo_reporte, r.descripcion
+        FROM reportes r
+        JOIN estudiantes e ON r.estudiante_id = e.id
+        ORDER BY r.fecha_reporte DESC
+    """)
+    reportes = cursor.fetchall()
+
+    # Deudores (simplemente todos los cobros, sin estado)
+    cursor.execute("""
+        SELECT e.nombre, c.concepto, c.monto, c.fecha_pago
+        FROM cobros c
+        JOIN estudiantes e ON c.estudiante_id = e.id
+        ORDER BY c.fecha_pago DESC
+    """)
     deudores = cursor.fetchall()
-    # Alumnos que no asistieron
-    cursor.execute("SELECT nombre, fecha FROM asistencia WHERE presente='No' ORDER BY fecha DESC")
+
+    # Ausentes
+    cursor.execute("""
+        SELECT e.nombre, a.fecha
+        FROM asistencia a
+        JOIN estudiantes e ON a.estudiante_id = e.id
+        WHERE a.presente=0
+        ORDER BY a.fecha DESC
+    """)
     ausentes = cursor.fetchall()
+
+    cursor.execute("SELECT id, nombre FROM estudiantes ORDER BY nombre")
+    estudiantes = cursor.fetchall()
+
     cursor.close()
-    return render_template('reportes.html', deudores=deudores, ausentes=ausentes)
+    conexion.close()
+    return render_template('reportes.html', reportes=reportes, deudores=deudores, ausentes=ausentes, estudiantes=estudiantes)
 
 # ====== EJECUCIÓN ======
 if __name__ == '__main__':
     app.run(debug=True)
-
